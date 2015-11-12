@@ -1,0 +1,63 @@
+package org.test.ticketservice.dao.impl;
+
+import java.util.List;
+
+import org.test.ticketservice.dao.LevelSeatsDao;
+import org.test.ticketservice.dao.tables.MockLevelRowsTable;
+import org.test.ticketservice.dao.tables.MockVenueLevelTable;
+import org.test.ticketservice.vo.LevelRowSeat;
+import org.test.ticketservice.vo.LevelSeats;
+
+public class LevelSeatsDaoImpl implements LevelSeatsDao{
+
+	@Override
+	public LevelSeats getVenueLevelSeatsInfo(int levelId) {
+		return MockVenueLevelTable.INSTANCE.getLevelSeats(levelId);
+	}
+
+	@Override
+	public LevelRowSeat getRowSeatInfo(int levelId, int rowNumber, int seatNumber) {
+		return MockLevelRowsTable.INSTANCE.getLevelRowSeat(levelId, rowNumber, seatNumber);
+	}
+
+	@Override
+	public List<LevelRowSeat> getAllLevelAvailableSeats() {
+		return MockLevelRowsTable.INSTANCE.getAllLevelAvailableSeats();
+	}
+
+	@Override
+	public List<LevelRowSeat> getLevelAvailableSeats(int levelId) {
+		return MockLevelRowsTable.INSTANCE.getLevelAvailableSeats(levelId);
+	}
+	
+	@Override
+	public void reserveLevelSeat(int levelId, int rowNumber, int seatNumber) {
+		MockLevelRowsTable.INSTANCE.reserveSeat(levelId, rowNumber, seatNumber);
+	}
+
+	@Override
+	public void holdLevelSeat(int levelId, int rowNumber, int seatNumber) {
+		MockLevelRowsTable.INSTANCE.holdSeat(levelId, rowNumber, seatNumber);
+	}
+
+	@Override
+	public void unreserveLevelSeat(int levelId, int rowNumber, int seatNumber) {
+		MockLevelRowsTable.INSTANCE.unreserveSeat(levelId, rowNumber, seatNumber);
+	}
+
+	@Override
+	public void releaseHeldLevelSeat(int levelId, int rowNumber, int seatNumber) {
+		MockLevelRowsTable.INSTANCE.releaseSeat(levelId, rowNumber, seatNumber);		
+	}
+
+	@Override
+	public int countAllLevelAvailableSeats() {
+		return MockLevelRowsTable.INSTANCE.countAllLevelAvailableSeats();
+	}
+
+	@Override
+	public int countLevelAvailableSeats(int levelId) {
+		return MockLevelRowsTable.INSTANCE.countAllLevelAvailableSeats(levelId);
+	}
+
+}

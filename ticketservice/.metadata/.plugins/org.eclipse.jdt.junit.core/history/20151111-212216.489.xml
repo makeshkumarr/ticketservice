@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="TicketServiceTest" project="ticketservice" tests="3" started="3" failures="0" errors="0" ignored="0">
+  <testsuite name="org.test.ticketservice.TicketServiceTest" time="40.28">
+    <testcase name="testFindAndHoldSeats" classname="org.test.ticketservice.TicketServiceTest" time="0.26"/>
+    <testcase name="testThread_HoldAfterExpiraryTime" classname="org.test.ticketservice.TicketServiceTest" time="40.02"/>
+    <testcase name="testNumSeatsAvailable" classname="org.test.ticketservice.TicketServiceTest" time="0.0"/>
+  </testsuite>
+</testrun>

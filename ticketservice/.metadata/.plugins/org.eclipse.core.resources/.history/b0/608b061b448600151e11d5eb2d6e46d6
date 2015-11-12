@@ -1,0 +1,14 @@
+package org.test.ticketservice.vo;
+
+import java.io.Serializable;
+
+public interface IRowSeat extends Serializable{
+
+	public default boolean isReserved() {
+		return false;
+	}
+	
+	public default boolean isHeld() {
+		return false;
+	}
+}

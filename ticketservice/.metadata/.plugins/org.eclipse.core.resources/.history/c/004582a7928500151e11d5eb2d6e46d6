@@ -1,0 +1,13 @@
+package org.test.ticketservice.dao;
+
+import org.test.ticketservice.vo.LevelRowSeat;
+import org.test.ticketservice.vo.LevelSeats;
+
+public interface LevelSeatsDao {
+	public LevelSeats getVenueLevelSeatsInfo(int levelId);
+	public LevelRowSeat getRowSeatInfo(int levelId, int rowNumber);
+	public void reserveLevelSeat(int levelId, int rowNumber, int seatNumber);
+	public void holdLevelSeat(int levelId, int rowNumber, int seatNumber);
+	public void unreserveLevelSeat(int levelId, int rowNumber, int seatNumber);
+	public void releaseHeldLevelSeat(int levelId, int rowNumber, int seatNumber);
+}

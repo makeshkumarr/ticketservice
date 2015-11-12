@@ -1,0 +1,43 @@
+package org.test.ticketservice.services.vo;
+
+import java.io.Serializable;
+
+public class LevelSeats implements Serializable{
+
+	private static final long serialVersionUID = 1720279830273254291L;
+	
+	private short levelId;
+	private String levelName;
+	private float price;
+	private short rows;
+	private short seatsPerRow;
+	
+	public LevelSeats(short levelId, String levelName, float price, short rows, short seatsPerRow) {
+		this.levelId = levelId;
+		this.levelName = levelName;
+		this.price = price;
+		this.rows = rows;
+		this.seatsPerRow = seatsPerRow;
+	}
+
+	public short getLevelId() {
+		return levelId;
+	}
+
+	public String getLevelName() {
+		return levelName;
+	}
+
+	public float getPrice() {
+		return price;
+	}
+
+	public short getRows() {
+		return rows;
+	}
+
+	public short getSeatsPerRow() {
+		return seatsPerRow;
+	}
+
+}

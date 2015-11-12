@@ -1,0 +1,148 @@
+package org.test.ticketservice.services.impl;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.test.ticketservice.dao.LevelSeatsDao;
+import org.test.ticketservice.dao.impl.LevelSeatsDaoImpl;
+import org.test.ticketservice.services.TicketService;
+import org.test.ticketservice.vo.IRowSeat;
+import org.test.ticketservice.vo.SeatHold;
+
+public class TicketServiceImpl implements TicketService {
+	
+	
+	private static final int VENUE_MAX_LEVEL = 4;
+
+	private static final int VENUE_MIN_LEVEL = 1;
+	
+	private LevelSeatsDao levelDao = new LevelSeatsDaoImpl();
+
+	@Override
+	public int numSeatsAvailable(Optional<Integer> venueLevel) {
+		if(venueLevel !=null && venueLevel.isPresent()) {
+			return levelDao.countLevelAvailableSeats(venueLevel.get());
+		}else {
+			return levelDao.countAllLevelAvailableSeats();
+		}
+	}
+
+	@Override
+	public SeatHold findAndHoldSeats(int numSeats, Optional<Integer> minLevel,
+			Optional<Integer> maxLevel, String customerEmail) {
+		int holdId = levelDao.getNextSeatHoldSequenceNumber();
+		int attemptCounts = 0;
+		while(attemptCounts<5) {
+			boolean isSeatsHeld = holdSeats(numSeats, minLevel, maxLevel, holdId);
+			/**
+				 * Verify all requested seats are held..
+				 */
+			if(isSeatsHeld) {
+				List<IRowSeat> heldSeats = levelDao.getHeldSeats(holdId);
+				if(heldSeats.size() == numSeats) {
+					SeatHold seatHold = new SeatHold(holdId, heldSeats);
+					return seatHold;
+				}else {
+					System.out.println("\n\nReleasing seats..."+holdId+ "  Size: "+heldSeats.size());
+					heldSeats.forEach(e -> {levelDao.releaseHeldLevelSeat(e.getLevelId(), e.getRowNumber(), e.getSeatNumber(), holdId);});
+				}
+			}else {
+				System.out.println("Seats not assigned..."+holdId);
+			}
+			attemptCounts++;
+		}
+
+		return null;
+	}
+	
+	private boolean holdSeats(int numSeats, Optional<Integer> minLevel,
+			Optional<Integer> maxLevel, int holdId) {
+		int minimumLevel = minLevel.orElse(VENUE_MIN_LEVEL);
+		int maximumLevel = maxLevel.orElse(VENUE_MAX_LEVEL);
+		
+		List<IRowSeat> levelAvailableSeats = null;
+		int availableSeatsCount = 0;
+		boolean isSeatAssigned = false;
+		for(int levelCount=minimumLevel; levelCount<maximumLevel; levelCount++) {
+				availableSeatsCount = levelDao.countLevelAvailableSeats(levelCount);
+				ReentrantLock lock = new ReentrantLock();
+				lock.lock();
+				try {
+
+				if(availableSeatsCount>=numSeats && !isSeatAssigned) {
+
+					levelAvailableSeats = levelDao.getLevelAvailableSeats(levelCount);
+						int heldCount = 0;
+						for(IRowSeat availableSeat:levelAvailableSeats) {
+
+							if(levelDao.holdLevelSeat(availableSeat.getLevelId(), availableSeat.getRowNumber(), availableSeat.getSeatNumber(),holdId)) {
+								heldCount ++;
+							}
+							if(heldCount == numSeats) {
+								isSeatAssigned = true;
+								return isSeatAssigned;
+							}
+						}
+					
+				}
+				}finally {
+					lock.unlock();
+				}
+			
+		}
+		if(!isSeatAssigned) {
+			/*
+			 * if seats are not available in a level
+			 */
+				availableSeatsCount = levelDao.countAllLevelAvailableSeats();
+
+				if(availableSeatsCount>=numSeats) {
+//					int seatsToBeAssigned = numSeats;
+//					int processSeats = seatsToBeAssigned;
+					int heldCount = 0;
+	
+//					for(int levelCount=minimumLevel; levelCount<maximumLevel && seatsToBeAssigned > 0; levelCount++) {
+						ReentrantLock lock = new ReentrantLock();
+						lock.lock();
+						try {
+							levelAvailableSeats = levelDao.getAllLevelAvailableSeats();
+//							processSeats = seatsToBeAssigned;
+//							seatsToBeAssigned = seatsToBeAssigned - levelAvailableSeats.size();
+//							if(seatsToBeAssigned>0){
+//								processSeats = levelAvailableSeats.size();
+//							}
+	
+							heldCount = 0;
+
+							for(IRowSeat availableSeat:levelAvailableSeats) {
+	
+								if(levelDao.holdLevelSeat(availableSeat.getLevelId(), availableSeat.getRowNumber(), availableSeat.getSeatNumber(),holdId)) {
+									heldCount ++;
+								}
+								if(heldCount == numSeats) {
+									isSeatAssigned = true;
+									return isSeatAssigned;
+								}
+							}
+						}finally {
+							lock.unlock();
+						}
+//					}
+				}
+		}
+		return isSeatAssigned;
+	}
+	@Override
+	public String reserveSeats(int seatHoldId, String customerEmail) {
+		List<IRowSeat> heldSeats = levelDao.getHeldSeats(seatHoldId);
+		heldSeats.forEach(e -> {levelDao.reserveLevelSeat(e.getLevelId(), e.getRowNumber(), e.getSeatNumber(), customerEmail);});
+		List<IRowSeat> reservedSeats = levelDao.getReservedSeats(customerEmail);
+		
+		if(reservedSeats.size() == heldSeats.size()) {
+			return "All seats reserved suucessfully";
+		}
+		return "Something really went wrong. It should not happen at all";
+	}
+
+}

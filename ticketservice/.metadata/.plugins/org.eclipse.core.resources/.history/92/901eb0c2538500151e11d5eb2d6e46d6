@@ -1,0 +1,7 @@
+package org.test.ticketservice.services.vo;
+
+import java.io.Serializable;
+
+public class SeatHold implements Serializable{
+
+}

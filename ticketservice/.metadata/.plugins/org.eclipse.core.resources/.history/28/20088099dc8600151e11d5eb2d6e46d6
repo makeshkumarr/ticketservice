@@ -1,0 +1,189 @@
+package org.test.ticketservice.dao.tables;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.test.ticketservice.vo.HeldSeat;
+import org.test.ticketservice.vo.IRowSeat;
+import org.test.ticketservice.vo.LevelRowSeat;
+import org.test.ticketservice.vo.ReservedSeat;
+
+public enum MockLevelRowsTable {
+	INSTANCE;
+	
+	Map<Integer,Map<Integer,Map<Integer,IRowSeat>>> venueLevelSeats = new HashMap<Integer, Map<Integer, Map<Integer,IRowSeat>>>();
+	int seatHoldSequenceNumber = -1;
+	
+	/*
+	 * Set up the initial data
+	 */
+	private MockLevelRowsTable() {
+		IRowSeat rowSeat = null;
+		//Orchestra level
+		Map<Integer, Map<Integer, IRowSeat>> rowSeats = new HashMap<Integer, Map<Integer, IRowSeat>>();
+		Map<Integer, IRowSeat> rowSeatMap = new HashMap<Integer, IRowSeat>();
+		int levelId = 1;
+		for(int rowCount=1; rowCount<=25; rowCount++) {
+			rowSeatMap = new HashMap<Integer, IRowSeat>();
+			for(int seatNumCount=1; seatNumCount<=50; seatNumCount++) {
+				rowSeat = new LevelRowSeat(levelId, rowCount, seatNumCount);
+				rowSeatMap.put(seatNumCount, rowSeat);
+			}
+			rowSeats.put(rowCount, rowSeatMap);
+		}
+		venueLevelSeats.put(levelId, rowSeats);
+		
+		//Main level
+		rowSeats = new HashMap<Integer, Map<Integer, IRowSeat>>();
+		rowSeatMap = new HashMap<Integer, IRowSeat>();
+		levelId = 2;
+		for(int rowCount=1; rowCount<=20; rowCount++) {
+			rowSeatMap = new HashMap<Integer, IRowSeat>();
+			for(int seatNumCount=1; seatNumCount<=100; seatNumCount++) {
+				rowSeat = new LevelRowSeat(levelId, rowCount, seatNumCount);
+				rowSeatMap.put(seatNumCount, rowSeat);
+			}
+			rowSeats.put(rowCount, rowSeatMap);
+		}
+		venueLevelSeats.put(levelId, rowSeats);
+		
+		//Balcony 1 level
+		rowSeats = new HashMap<Integer, Map<Integer, IRowSeat>>();
+		rowSeatMap = new HashMap<Integer, IRowSeat>();
+		levelId = 3;
+		for(int rowCount=1; rowCount<=15; rowCount++) {
+			rowSeatMap = new HashMap<Integer, IRowSeat>();
+			for(int seatNumCount=1; seatNumCount<=100; seatNumCount++) {
+				rowSeat = new LevelRowSeat(levelId, rowCount, seatNumCount);
+				rowSeatMap.put(seatNumCount, rowSeat);
+			}
+			rowSeats.put(rowCount, rowSeatMap);
+		}
+		venueLevelSeats.put(levelId, rowSeats);
+		
+		//Balcony 2 level
+		rowSeats = new HashMap<Integer, Map<Integer, IRowSeat>>();
+		rowSeatMap = new HashMap<Integer, IRowSeat>();
+		levelId = 4;
+		for(int rowCount=1; rowCount<=15; rowCount++) {
+			rowSeatMap = new HashMap<Integer, IRowSeat>();
+			for(int seatNumCount=1; seatNumCount<=100; seatNumCount++) {
+				rowSeat = new LevelRowSeat(levelId, rowCount, seatNumCount);
+				rowSeatMap.put(seatNumCount, rowSeat);
+			}
+			rowSeats.put(rowCount, rowSeatMap);
+		}
+		venueLevelSeats.put(levelId, rowSeats);
+	}
+	
+	public int getNextSeatHoldSequenceNumber() {
+		return ++seatHoldSequenceNumber;
+	}
+	
+	public IRowSeat getLevelRowSeat(int levelId, int rowNumber, int seatNumber) {
+		Map<Integer,Map<Integer, IRowSeat>> levelRowsMap = venueLevelSeats.get(levelId);
+		if(levelRowsMap == null) {
+			return new LevelRowSeat(levelId,rowNumber, seatNumber);
+		}
+		Map<Integer, IRowSeat> rowSeatsMap = levelRowsMap.get(rowNumber);
+		if(rowSeatsMap == null) {
+			return new LevelRowSeat(levelId,rowNumber, seatNumber);
+		}
+		IRowSeat seat = rowSeatsMap.get(seatNumber);
+		return seat;
+	}
+	
+	public int countAllLevelAvailableSeats() {
+		return getAllLevelAvailableSeats().size();
+	}
+	
+	public int countAllLevelAvailableSeats(int levelId) {
+		return getLevelAvailableSeats(levelId).size();
+	}
+	
+	public List<IRowSeat> getAllLevelAvailableSeats() {
+		List<IRowSeat> allAvailableSeats= new ArrayList<IRowSeat>();
+		if(venueLevelSeats!=null && !venueLevelSeats.isEmpty()) {
+			Collection<Map<Integer, Map<Integer, IRowSeat>>> venueLevelSeatsEntries = venueLevelSeats.values();
+			venueLevelSeatsEntries.forEach(e -> {Collection<Map<Integer, IRowSeat>> rowSeatsMap = e.values();
+						rowSeatsMap.forEach(a -> {Collection<IRowSeat> rowSeats = a.values();
+						rowSeats.forEach(b -> {if(!(b.isHeld()|| b.isReserved())){allAvailableSeats.add(b);}});
+						});
+				});
+		}
+		return allAvailableSeats;
+	}
+	
+	public List<IRowSeat> getHeldSeats(int holdId) {
+		List<IRowSeat> allHeldSeats= new ArrayList<IRowSeat>();
+		if(venueLevelSeats!=null && !venueLevelSeats.isEmpty()) {
+			Collection<Map<Integer, Map<Integer, IRowSeat>>> venueLevelSeatsEntries = venueLevelSeats.values();
+			venueLevelSeatsEntries.forEach(e -> {Collection<Map<Integer, IRowSeat>> rowSeatsMap = e.values();
+						rowSeatsMap.forEach(a -> {Collection<IRowSeat> rowSeats = a.values();
+						rowSeats.forEach(b -> {if(b.isHeld() && b.getSeatHoldId()==holdId){allHeldSeats.add(b);}});
+						});
+				});
+		}
+		return allHeldSeats;
+	}	
+	
+	public int countHeldSeats(int holdId) {
+		List<IRowSeat> allHeldSeats= new ArrayList<IRowSeat>();
+		if(venueLevelSeats!=null && !venueLevelSeats.isEmpty()) {
+			Collection<Map<Integer, Map<Integer, IRowSeat>>> venueLevelSeatsEntries = venueLevelSeats.values();
+			venueLevelSeatsEntries.forEach(e -> {Collection<Map<Integer, IRowSeat>> rowSeatsMap = e.values();
+						rowSeatsMap.forEach(a -> {Collection<IRowSeat> rowSeats = a.values();
+						rowSeats.forEach(b -> {if(b.isHeld() && b.getSeatHoldId()== holdId){allHeldSeats.add(b);}});
+						});
+				});
+		}
+		return allHeldSeats.size();
+	}
+	
+	public List<IRowSeat> getLevelAvailableSeats(int levelId) {
+		List<IRowSeat> allAvailableSeats= new ArrayList<IRowSeat>();
+		Map<Integer, Map<Integer, IRowSeat>> levelSeats = venueLevelSeats.get(levelId);
+		if(levelSeats!=null && !levelSeats.isEmpty()) {
+			Collection<Map<Integer, IRowSeat>> venueLevelSeatsEntries = levelSeats.values();
+			venueLevelSeatsEntries.forEach(e -> {Collection<IRowSeat> rowSeats = e.values();
+						rowSeats.forEach(b -> {if(!(b.isHeld()|| b.isReserved())){allAvailableSeats.add(b);}});
+			});
+		}
+		return allAvailableSeats;
+	}	
+	
+	public void reserveSeat(int levelId, int rowNumber, int seatNumber, String customerEmail) {
+		Map<Integer, Map<Integer, IRowSeat>> levelSeats = venueLevelSeats.get(levelId);
+		if(levelSeats!=null && !levelSeats.isEmpty()) {
+			Map<Integer, IRowSeat> rowSeats = levelSeats.get(rowNumber);
+			if(rowSeats!=null && !rowSeats.isEmpty()) {
+				IRowSeat seat = rowSeats.get(seatNumber);
+				rowSeats.put(seatNumber, new ReservedSeat(seat,customerEmail));
+			}
+		}
+	}
+	
+	public void holdSeat(int levelId, int rowNumber, int seatNumber, String seatHoldId) {
+		Map<Integer, Map<Integer, IRowSeat>> levelSeats = venueLevelSeats.get(levelId);
+		if(levelSeats!=null && !levelSeats.isEmpty()) {
+			Map<Integer, IRowSeat> rowSeats = levelSeats.get(rowNumber);
+			if(rowSeats!=null && !rowSeats.isEmpty()) {
+				IRowSeat seat = rowSeats.get(seatNumber);
+				rowSeats.put(seatNumber, new HeldSeat(seat,seatHoldId));
+			}
+		}
+	}
+	
+	public void unreserveSeat(int levelId, int rowNumber, int seatNumber) {
+//		IRowSeat levelRowSeat = getLevelRowSeat(levelId, rowNumber, seatNumber);
+//		levelRowSeat.unreserveSeat();
+	}
+	
+	public void releaseSeat(int levelId, int rowNumber, int seatNumber) {
+//		IRowSeat levelRowSeats = getLevelRowSeat(levelId, rowNumber, seatNumber);
+//		levelRowSeats.releaseSeat();
+	}
+}

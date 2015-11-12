@@ -1,0 +1,5 @@
+package org.test.ticketservice.dao.tables;
+
+public class MockVenueLevelTable {
+
+}

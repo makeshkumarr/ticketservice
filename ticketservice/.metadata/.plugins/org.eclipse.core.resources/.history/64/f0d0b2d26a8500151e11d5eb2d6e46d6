@@ -1,0 +1,60 @@
+package org.test.ticketservice.vo;
+
+import java.io.Serializable;
+
+public class LevelRowSeats implements Serializable{
+
+	private static final long serialVersionUID = -8855316060233353406L;
+	
+	private int levelId;
+	private int rowNumber;
+	private int reservedSeats;
+	private int holdSeats;
+
+	public LevelRowSeats(int levelId, int rowNumber) {
+		this.levelId = levelId;
+		this.rowNumber = rowNumber;
+	}
+	
+	public int getLevelId() {
+		return levelId;
+	}
+
+	public int getRowNumber() {
+		return rowNumber;
+	}
+
+	public int getReservedSeats() {
+		return reservedSeats;
+	}
+
+	public int getHoldSeats() {
+		return holdSeats;
+	}
+	
+	public void resetReservedSeats() {
+		this.reservedSeats = 0;
+	}
+
+	public void resetHoldSeats() {
+		this.holdSeats = 0;
+	}
+	
+	public void addReservedSeats(short moreSeats) {
+		this.reservedSeats = (short) (this.reservedSeats + moreSeats);
+	}
+
+	public void addHoldSeats(short moreSeats) {
+		this.holdSeats = (short) (this.holdSeats + moreSeats);
+	}
+
+	public void removeReservedSeats(short seatsNotNeeded) {
+		this.reservedSeats = (short) (this.reservedSeats - seatsNotNeeded);
+	}
+
+	public void removeHoldSeats(short seatsNotNeeded) {
+		this.holdSeats = (short) (this.holdSeats - seatsNotNeeded);
+	}
+
+	
+}

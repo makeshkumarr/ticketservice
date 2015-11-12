@@ -1,0 +1,31 @@
+package org.test.ticketservice.dao.impl;
+
+import org.test.ticketservice.dao.LevelSeatsDao;
+import org.test.ticketservice.dao.tables.MockLevelRowsTable;
+import org.test.ticketservice.dao.tables.MockVenueLevelTable;
+import org.test.ticketservice.vo.LevelRowSeat;
+import org.test.ticketservice.vo.LevelSeats;
+
+public class LevelSeatsDaoImpl implements LevelSeatsDao{
+
+	@Override
+	public LevelSeats getVenueLevelSeatsInfo(int levelId) {
+		return MockVenueLevelTable.INSTANCE.getLevelSeats(levelId);
+	}
+
+	@Override
+	public LevelRowSeat getRowSeatsInfo(int levelId, int rowNumber) {
+		return MockLevelRowsTable.INSTANCE.getLevelRowSeats(levelId, rowNumber);
+	}
+
+	@Override
+	public void reserveLevelSeats(int levelId, int rowNumber, int noOfSeats) {
+		MockLevelRowsTable.INSTANCE.reserveSeats(levelId, rowNumber, noOfSeats);
+	}
+
+	@Override
+	public void holdLevelSeats(int levelId, int rowNumber, int noOfSeats) {
+		MockLevelRowsTable.INSTANCE.holdSeats(levelId, rowNumber, noOfSeats);
+	}
+
+}

@@ -1,0 +1,43 @@
+package org.test.ticketservice;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.Test;
+import org.test.ticketservice.dao.LevelSeatsDao;
+import org.test.ticketservice.dao.impl.LevelSeatsDaoImpl;
+import org.test.ticketservice.services.TicketService;
+import org.test.ticketservice.services.impl.TicketServiceImpl;
+import org.test.ticketservice.vo.IRowSeat;
+import org.test.ticketservice.vo.SeatHold;
+
+import static org.junit.Assert.*;
+public class TicketServiceTest {
+
+	private TicketService ticketService = new TicketServiceImpl();
+	private LevelSeatsDao levelDao = new LevelSeatsDaoImpl();
+
+//	@Test
+//	public void testNumSeatsAvailable() {
+//		assertEquals(6250,ticketService.numSeatsAvailable(Optional.empty()));		
+//		assertEquals(1250,ticketService.numSeatsAvailable(Optional.of(1)));
+//		assertEquals(200,ticketService.numSeatsAvailable(Optional.of(2)));
+//		assertEquals(1500,ticketService.numSeatsAvailable(Optional.of(3)));
+//		assertEquals(1500,ticketService.numSeatsAvailable(Optional.of(4)));
+//
+//	}
+	
+	@Test
+	public void testFindAndHoldSeats() {
+		int numSeatsNeeded = 1;
+		String customerEmail = "makeshkumar.r@gmail.com";
+		SeatHold seatHold = ticketService.findAndHoldSeats(numSeatsNeeded, Optional.of(1), Optional.of(2), customerEmail);
+		assertEquals(6249,ticketService.numSeatsAvailable(Optional.empty()));	
+		List<IRowSeat> heldSeats = levelDao.getHeldSeats(seatHold.getSeatHoldId());
+		assertEquals(numSeatsNeeded, heldSeats.size());
+		ticketService.reserveSeats(seatHold.getSeatHoldId(), customerEmail);
+		List<IRowSeat> reservedSeats = levelDao.getReservedSeats(customerEmail);
+		assertEquals(numSeatsNeeded, reservedSeats.size());
+
+	}
+}

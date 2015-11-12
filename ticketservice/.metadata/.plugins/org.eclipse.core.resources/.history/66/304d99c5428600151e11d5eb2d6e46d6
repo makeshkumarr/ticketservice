@@ -1,0 +1,12 @@
+package org.test.ticketservice.vo;
+
+public class ReservedSeat extends LevelRowSeat {
+
+	public ReservedSeat(int levelId, int rowNumber, int seatNumber) {
+		super(levelId, rowNumber, seatNumber);
+	}
+
+	public boolean isReserved() {
+		return true;
+	}
+}

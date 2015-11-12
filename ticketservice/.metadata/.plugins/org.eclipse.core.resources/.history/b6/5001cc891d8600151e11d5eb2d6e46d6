@@ -1,0 +1,33 @@
+package org.test.ticketservice.services.impl;
+
+import java.util.Optional;
+
+import org.test.ticketservice.dao.LevelSeatsDao;
+import org.test.ticketservice.dao.impl.LevelSeatsDaoImpl;
+import org.test.ticketservice.services.TicketService;
+import org.test.ticketservice.vo.SeatHold;
+
+public class TicketServiceImpl implements TicketService {
+	
+	private LevelSeatsDao levelDao = new LevelSeatsDaoImpl();
+
+	@Override
+	public int numSeatsAvailable(Optional<Integer> venueLevel) {
+		levelDao.get
+		return 0;
+	}
+
+	@Override
+	public SeatHold findAndHoldSeats(int numSeats, Optional<Integer> minLevel,
+			Optional<Integer> maxLevel, String customerEmail) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String reserveSeats(int seatHoldId, String customerEmail) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

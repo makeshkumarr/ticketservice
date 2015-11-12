@@ -1,0 +1,31 @@
+package org.test.ticketservice.vo;
+
+import java.io.Serializable;
+import java.util.Optional;
+
+public interface IRowSeat extends Serializable{
+
+	public default boolean isReserved() {
+		return false;
+	}
+	
+	public default boolean isHeld() {
+		return false;
+	}
+	
+	public default Optional<Integer> getSeatHoldId() {
+		Integer seatHoldId = null;
+		return Optional.ofNullable(seatHoldId);
+	}
+	
+	public default Optional<String> getCustomerEmail() {
+		String customerEmail = null;
+		return Optional.ofNullable(customerEmail);
+	}
+	
+	public int getLevelId();
+
+	public int getRowNumber();
+
+	public int getSeatNumber();
+}

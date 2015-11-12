@@ -1,0 +1,21 @@
+package org.test.ticketservice.dao.impl;
+
+import org.test.ticketservice.dao.LevelSeatsDao;
+import org.test.ticketservice.vo.LevelRowSeats;
+import org.test.ticketservice.vo.LevelSeats;
+
+public class LevelSeatsDaoImpl implements LevelSeatsDao{
+
+	@Override
+	public LevelSeats getVenueLevelSeatsInfo(int levelId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public LevelRowSeats getRowSeatsInfo(int levelId, int rowNumber) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

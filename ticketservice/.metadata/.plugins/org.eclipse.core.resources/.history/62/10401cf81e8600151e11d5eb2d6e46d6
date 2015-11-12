@@ -1,0 +1,13 @@
+package org.test.ticketservice;
+
+import org.test.ticketservice.services.TicketService;
+import org.test.ticketservice.services.impl.TicketServiceImpl;
+
+public class TicketServiceTest {
+
+	TicketService ticketService = new TicketServiceImpl();
+	
+	public void testNumSeatsAvailable() {
+		assertEquals(ticketService.numSeatsAvailable(null),26250);
+	}
+}

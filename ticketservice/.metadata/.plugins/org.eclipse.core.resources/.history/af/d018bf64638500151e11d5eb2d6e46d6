@@ -1,0 +1,9 @@
+package org.test.ticketservice.services.vo;
+
+import java.io.Serializable;
+
+public class SeatHold implements Serializable{
+
+	private static final long serialVersionUID = 3888840549041404679L;
+
+}

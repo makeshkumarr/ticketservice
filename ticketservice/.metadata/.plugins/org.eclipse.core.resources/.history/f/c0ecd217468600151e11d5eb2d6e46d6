@@ -1,0 +1,19 @@
+package org.test.ticketservice.vo;
+
+public class ReservedSeat extends LevelRowSeat {
+
+	private static final long serialVersionUID = 2352226128231609834L;
+
+	public ReservedSeat(int levelId, int rowNumber, int seatNumber) {
+		super(levelId, rowNumber, seatNumber);
+	}
+
+	public ReservedSeat(LevelRowSeat rowSeat){
+		this(rowSeat.getLevelId(),rowSeat.getRowNumber(),rowSeat.getSeatNumber());
+	}
+	
+	@Override
+	public boolean isReserved() {
+		return true;
+	}
+}

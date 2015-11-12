@@ -1,0 +1,19 @@
+package org.test.ticketservice.dao;
+
+import java.util.List;
+
+import org.test.ticketservice.vo.LevelRowSeat;
+import org.test.ticketservice.vo.LevelSeats;
+
+public interface LevelSeatsDao {
+	public LevelSeats getVenueLevelSeatsInfo(int levelId);
+	public LevelRowSeat getRowSeatInfo(int levelId, int rowNumber, int seatNumber);
+	public List<LevelRowSeat> getAllLevelAvailableSeats();
+	public List<LevelRowSeat> getLevelAvailableSeats(int levelId);
+	public int countAllLevelAvailableSeats();
+	public int countLevelAvailableSeats(int levelId);
+	public void reserveLevelSeat(int levelId, int rowNumber, int seatNumber);
+	public void holdLevelSeat(int levelId, int rowNumber, int seatNumber);
+	public void unreserveLevelSeat(int levelId, int rowNumber, int seatNumber);
+	public void releaseHeldLevelSeat(int levelId, int rowNumber, int seatNumber);
+}

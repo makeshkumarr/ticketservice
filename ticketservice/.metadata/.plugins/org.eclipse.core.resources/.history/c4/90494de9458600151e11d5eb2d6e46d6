@@ -1,0 +1,22 @@
+package org.test.ticketservice.vo;
+
+public class HeldSeat extends LevelRowSeat {
+
+	private static final long serialVersionUID = 496461809585844020L;
+
+	private String seatHoldKey;
+	
+	public HeldSeat(int levelId, int rowNumber, int seatNumber, String seatHoldKey) {
+		super(levelId, rowNumber, seatNumber);
+		this.seatHoldKey = seatHoldKey;
+	}
+	
+	public HeldSeat(LevelRowSeat rowSeat, String seatHoldKey){
+		this(rowSeat.getLevelId(),rowSeat.getRowNumber(),rowSeat.getSeatNumber(), seatHoldKey);
+	}
+
+	@Override
+	public boolean isHeld() {
+		return true;
+	}
+}

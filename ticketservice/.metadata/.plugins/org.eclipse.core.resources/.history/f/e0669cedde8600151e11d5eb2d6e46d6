@@ -1,0 +1,92 @@
+package org.test.ticketservice.services.impl;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.test.ticketservice.dao.LevelSeatsDao;
+import org.test.ticketservice.dao.impl.LevelSeatsDaoImpl;
+import org.test.ticketservice.services.TicketService;
+import org.test.ticketservice.vo.IRowSeat;
+import org.test.ticketservice.vo.SeatHold;
+
+public class TicketServiceImpl implements TicketService {
+	
+	
+	private static final int VENUE_MAX_LEVEL = 4;
+
+	private static final int VENUE_MIN_LEVEL = 1;
+	
+	private LevelSeatsDao levelDao = new LevelSeatsDaoImpl();
+
+	@Override
+	public int numSeatsAvailable(Optional<Integer> venueLevel) {
+		if(venueLevel !=null && venueLevel.isPresent()) {
+			return levelDao.countLevelAvailableSeats(venueLevel.get());
+		}else {
+			return levelDao.countAllLevelAvailableSeats();
+		}
+	}
+
+	@Override
+	public SeatHold findAndHoldSeats(int numSeats, Optional<Integer> minLevel,
+			Optional<Integer> maxLevel, String customerEmail) {
+		int minimumLevel = minLevel.orElse(VENUE_MIN_LEVEL);
+		int maximumLevel = maxLevel.orElse(VENUE_MAX_LEVEL);
+		
+		List<IRowSeat> levelAvailableSeats = null;
+		int availableSeatsCount = 0;
+		boolean isSeatAssigned = false;
+		int holdId = levelDao.getNextSeatHoldSequenceNumber();
+		for(int levelCount=minimumLevel; levelCount<maximumLevel; levelCount++) {
+			availableSeatsCount = levelDao.countLevelAvailableSeats(levelCount);
+			if(availableSeatsCount>=numSeats) {
+				isSeatAssigned = true;
+				levelAvailableSeats = levelDao.getLevelAvailableSeats(levelCount);
+				levelAvailableSeats.forEach(e -> {for(int seatCount=0;seatCount<numSeats;seatCount++) {levelDao.holdLevelSeat(e.getLevelId(), e.getRowNumber(), e.getSeatNumber(),holdId);}});
+			}
+		}
+		if(!isSeatAssigned) {
+			/*
+			 * if seats are not available in a level
+			 */
+			availableSeatsCount = levelDao.countAllLevelAvailableSeats();
+			if(availableSeatsCount>=numSeats) {
+				isSeatAssigned = true;
+				int seatsToBeAssigned = numSeats;
+				for(int levelCount=minimumLevel; levelCount<maximumLevel && seatsToBeAssigned > 0; levelCount++) {
+					levelAvailableSeats = levelDao.getLevelAvailableSeats(levelCount);
+					final int processSeats = seatsToBeAssigned;
+					seatsToBeAssigned = seatsToBeAssigned - levelAvailableSeats.size();
+					if(seatsToBeAssigned>0){
+						levelAvailableSeats.forEach(e -> {levelDao.holdLevelSeat(e.getLevelId(), e.getRowNumber(), e.getSeatNumber(),holdId);});
+					}else {
+						levelAvailableSeats.forEach(e -> {for(int seatCount=0;seatCount<processSeats;seatCount++) {levelDao.holdLevelSeat(e.getLevelId(), e.getRowNumber(), e.getSeatNumber(),holdId);}});
+					}
+				}
+			}
+		}
+		/**
+		 * Verify all requested seats are held..
+		 */
+		if(isSeatAssigned) {
+			List<IRowSeat> heldSeats = levelDao.getHeldSeats(holdId);
+			if(heldSeats.size() == numSeats) {
+				//All requested seats held successfully
+				SeatHold seatHold = new SeatHold(holdId, heldSeats);
+				return seatHold;
+			}else {
+				//Release the partially held seats
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public String reserveSeats(int seatHoldId, String customerEmail) {
+		List<IRowSeat> heldSeats = levelDao.getHeldSeats(seatHoldId);
+		heldSeats.forEach(e -> levelDao.reserveLevelSeat(e., rowNumber, seatNumber, cutomerEmail));
+		return null;
+	}
+
+}
