@@ -1,9 +1,0 @@
-package org.test.ticketservice.vo;
-
-public class HeldSeat extends LevelRowSeat {
-
-	public HeldSeat(int levelId, int rowNumber, int seatNumber) {
-		super(levelId, rowNumber, seatNumber);
-	}
-
-}

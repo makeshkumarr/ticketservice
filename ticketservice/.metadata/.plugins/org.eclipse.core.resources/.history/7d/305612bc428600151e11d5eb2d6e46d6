@@ -1,5 +1,0 @@
-package org.test.ticketservice.vo;
-
-public class ReservedSeat extends LevelRowSeat {
-
-}

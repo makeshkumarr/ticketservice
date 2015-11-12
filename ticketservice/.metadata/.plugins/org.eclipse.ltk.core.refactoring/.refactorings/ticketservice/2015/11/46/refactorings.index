@@ -1,7 +1,0 @@
-1446989101784	Rename local variable 'allSeats'
-1446989945298	Rename method 'getLevelSeats'
-1446989970748	Rename method 'getAllLevelSeats'
-1447000448709	Extract constant 'VENUE_MIN_LEVEL'
-1447000465391	Extract constant 'VENUE_MAX_LEVEL'
-1447007029415	Encapsulate field 'seatHoldKey'
-1447295454420	Rename local variable 'seatHold'

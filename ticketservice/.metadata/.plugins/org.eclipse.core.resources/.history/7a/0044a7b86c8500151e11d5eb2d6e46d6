@@ -1,5 +1,0 @@
-package org.test.ticketservice.dao.impl;
-
-public class LevelSeatsDaoImpl implements LevelSeatsDao{
-
-}

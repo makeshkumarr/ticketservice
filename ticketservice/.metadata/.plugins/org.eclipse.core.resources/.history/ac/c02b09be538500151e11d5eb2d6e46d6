@@ -1,5 +1,0 @@
-package org.test.ticketservice.services.vo;
-
-public class SeatHold {
-
-}

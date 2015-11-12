@@ -1,7 +1,0 @@
-package org.test.ticketservice.vo;
-
-import java.io.Serializable;
-
-public class LevelRowSeats implements Serializable{
-
-}

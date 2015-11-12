@@ -1,5 +1,0 @@
-package org.test.ticketservice.services;
-
-public interface TicketService {
-
-}

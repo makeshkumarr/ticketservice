@@ -1,9 +1,0 @@
-package org.test.ticketservice.dao;
-
-import org.test.ticketservice.vo.LevelRowSeats;
-import org.test.ticketservice.vo.LevelSeats;
-
-public interface LevelSeatsDao {
-	public LevelSeats getVenueLevelSeatsInfo(int levelId);
-	public LevelRowSeats getRowSeatsInfo(int levelId, int rowNumber);
-}
