@@ -47,8 +47,8 @@ public class TicketServiceTest {
 		assertEquals(6249,ticketService.numSeatsAvailable(Optional.empty()));	
 		List<IRowSeat> heldSeats = levelDao.getHeldSeats(seatHold.getSeatHoldId());
 		assertEquals(numSeatsNeeded, heldSeats.size());
-		ticketService.reserveSeats(seatHold.getSeatHoldId(), customerEmail);
-		List<IRowSeat> reservedSeats = levelDao.getReservedSeats(customerEmail);
+		String confirmationCode = ticketService.reserveSeats(seatHold.getSeatHoldId(), customerEmail);
+		List<IRowSeat> reservedSeats = levelDao.getReservedSeats(confirmationCode);
 		assertEquals(numSeatsNeeded, reservedSeats.size());
 		assertTrue(checkConfirmationKeyIsAvailable(reservedSeats));
 
@@ -62,8 +62,8 @@ public class TicketServiceTest {
 		assertEquals(6245,ticketService.numSeatsAvailable(Optional.empty()));	
 		List<IRowSeat> heldSeats = levelDao.getHeldSeats(seatHold1.getSeatHoldId());
 		assertEquals(numSeatsNeeded, heldSeats.size());
-		ticketService.reserveSeats(seatHold1.getSeatHoldId(), customerEmail);
-		List<IRowSeat> reservedSeats = levelDao.getReservedSeats(customerEmail);
+		String confirmationCode = ticketService.reserveSeats(seatHold1.getSeatHoldId(), customerEmail);
+		List<IRowSeat> reservedSeats = levelDao.getReservedSeats(confirmationCode);
 		assertEquals(numSeatsNeeded, reservedSeats.size());
 		assertTrue(checkConfirmationKeyIsAvailable(reservedSeats));
 
@@ -71,9 +71,9 @@ public class TicketServiceTest {
 		assertEquals(6240,ticketService.numSeatsAvailable(Optional.empty()));	
 		heldSeats = levelDao.getHeldSeats(seatHold2.getSeatHoldId());
 		assertEquals(numSeatsNeeded, heldSeats.size());
-		ticketService.reserveSeats(seatHold2.getSeatHoldId(), customerEmail);
-		reservedSeats = levelDao.getReservedSeats(customerEmail);
-		assertEquals(numSeatsNeeded * 2, reservedSeats.size());
+		confirmationCode = ticketService.reserveSeats(seatHold2.getSeatHoldId(), customerEmail);
+		reservedSeats = levelDao.getReservedSeats(confirmationCode);
+		assertEquals(numSeatsNeeded, reservedSeats.size());
 		assertTrue(checkConfirmationKeyIsAvailable(reservedSeats));
 
 	}
@@ -88,56 +88,224 @@ public class TicketServiceTest {
 		assertEquals(6245,ticketService.numSeatsAvailable(Optional.empty()));	
 		List<IRowSeat> heldSeats = levelDao.getHeldSeats(seatHold1.getSeatHoldId());
 		assertEquals(numSeatsNeeded, heldSeats.size());
-		ticketService.reserveSeats(seatHold1.getSeatHoldId(), customerEmail1);
-		List<IRowSeat> reservedSeats = levelDao.getReservedSeats(customerEmail1);
+		String confirmationCode = ticketService.reserveSeats(seatHold1.getSeatHoldId(), customerEmail1);
+		List<IRowSeat> reservedSeats = levelDao.getReservedSeats(confirmationCode);
 		assertEquals(numSeatsNeeded, reservedSeats.size());
 		
 		SeatHold seatHold2 = ticketService.findAndHoldSeats(numSeatsNeeded, Optional.of(1), Optional.of(2), customerEmail2);
 		assertEquals(6240,ticketService.numSeatsAvailable(Optional.empty()));	
 		heldSeats = levelDao.getHeldSeats(seatHold2.getSeatHoldId());
 		assertEquals(numSeatsNeeded, heldSeats.size());
-		ticketService.reserveSeats(seatHold2.getSeatHoldId(), customerEmail2);
-		reservedSeats = levelDao.getReservedSeats(customerEmail2);
+		confirmationCode = ticketService.reserveSeats(seatHold2.getSeatHoldId(), customerEmail2);
+		reservedSeats = levelDao.getReservedSeats(confirmationCode);
 		assertEquals(numSeatsNeeded, reservedSeats.size());
 		assertTrue(checkConfirmationKeyIsAvailable(reservedSeats));
 
 	}
 	
 	@Test
-	public void test10() throws InterruptedException, ExecutionException{
-		test(10,10,0,1);
+	public void testLevelSpecificSeatReservation() {
+		int numSeatsNeeded = 5;
+		int levelNeeded = 4;
+		String customerEmail1 = "makeshkumar.r@gmail.com";
+
+		SeatHold seatHold1 = ticketService.findAndHoldSeats(numSeatsNeeded, Optional.of(levelNeeded), Optional.of(levelNeeded), customerEmail1);
+		assertEquals(6245,ticketService.numSeatsAvailable(Optional.empty()));	
+		List<IRowSeat> heldSeats = levelDao.getHeldSeats(seatHold1.getSeatHoldId());
+		assertEquals(numSeatsNeeded, heldSeats.size());
+		String confirmationCode = ticketService.reserveSeats(seatHold1.getSeatHoldId(), customerEmail1);
+		List<IRowSeat> reservedSeats = levelDao.getReservedSeats(confirmationCode);
+		assertEquals(numSeatsNeeded, reservedSeats.size());
+		for(IRowSeat reserved: reservedSeats) {
+			assertTrue(levelNeeded == reserved.getLevelId());
+		}
+
+	}
+	
+	@Test
+	public void testNoLevelSpecificSeatReservation() {
+		int numSeatsNeeded = 5;
+		String customerEmail1 = "makeshkumar.r@gmail.com";
+
+		SeatHold seatHold1 = ticketService.findAndHoldSeats(numSeatsNeeded, Optional.empty(), Optional.empty(), customerEmail1);
+		assertEquals(6245,ticketService.numSeatsAvailable(Optional.empty()));	
+		List<IRowSeat> heldSeats = levelDao.getHeldSeats(seatHold1.getSeatHoldId());
+		assertEquals(numSeatsNeeded, heldSeats.size());
+		String confirmationCode = ticketService.reserveSeats(seatHold1.getSeatHoldId(), customerEmail1);
+		List<IRowSeat> reservedSeats = levelDao.getReservedSeats(confirmationCode);
+		assertEquals(numSeatsNeeded, reservedSeats.size());
+		for(IRowSeat reserved: reservedSeats) {
+			assertTrue(1 == reserved.getLevelId());
+		}
+
+	}
+	
+	@Test
+	public void testBestAvailableSeats() {
+		//Reserve all seats except 2 in Level 1
+		int numSeatsNeeded = 1248; 
+		int levelNeeded = 1;
+		String customerEmail1 = "makeshkumar.r@gmail.com";
+
+		SeatHold seatHold1 = ticketService.findAndHoldSeats(numSeatsNeeded, Optional.of(levelNeeded), Optional.of(levelNeeded), customerEmail1);
+		assertEquals(2,ticketService.numSeatsAvailable(Optional.of(levelNeeded)));	
+		List<IRowSeat> heldSeats = levelDao.getHeldSeats(seatHold1.getSeatHoldId());
+		assertEquals(numSeatsNeeded, heldSeats.size());
+		String confirmationCode = ticketService.reserveSeats(seatHold1.getSeatHoldId(), customerEmail1);
+		List<IRowSeat> reservedSeats = levelDao.getReservedSeats(confirmationCode);
+		assertEquals(numSeatsNeeded, reservedSeats.size());
+		for(IRowSeat reserved: reservedSeats) {
+			assertTrue(levelNeeded == reserved.getLevelId());
+		}
+		
+		//Reserve all seats except 2 in Level 2
+		numSeatsNeeded = 1998; 
+		levelNeeded = 2;
+
+		seatHold1 = ticketService.findAndHoldSeats(numSeatsNeeded, Optional.of(levelNeeded), Optional.of(levelNeeded), customerEmail1);
+		assertEquals(2,ticketService.numSeatsAvailable(Optional.of(levelNeeded)));	
+		heldSeats = levelDao.getHeldSeats(seatHold1.getSeatHoldId());
+		assertEquals(numSeatsNeeded, heldSeats.size());
+		confirmationCode = ticketService.reserveSeats(seatHold1.getSeatHoldId(), customerEmail1);
+		reservedSeats = levelDao.getReservedSeats(confirmationCode);
+		assertEquals(numSeatsNeeded, reservedSeats.size());
+		for(IRowSeat reserved: reservedSeats) {
+			assertTrue(levelNeeded == reserved.getLevelId());
+		}
+		
+		//Reserve all seats except 3 in Level 3
+		numSeatsNeeded = 1497; 
+		levelNeeded = 3;
+
+		seatHold1 = ticketService.findAndHoldSeats(numSeatsNeeded, Optional.of(levelNeeded), Optional.of(levelNeeded), customerEmail1);
+		assertEquals(3,ticketService.numSeatsAvailable(Optional.of(levelNeeded)));	
+		heldSeats = levelDao.getHeldSeats(seatHold1.getSeatHoldId());
+		assertEquals(numSeatsNeeded, heldSeats.size());
+		confirmationCode = ticketService.reserveSeats(seatHold1.getSeatHoldId(), customerEmail1);
+		reservedSeats = levelDao.getReservedSeats(confirmationCode);
+		assertEquals(numSeatsNeeded, reservedSeats.size());
+		for(IRowSeat reserved: reservedSeats) {
+			assertTrue(levelNeeded == reserved.getLevelId());
+		}
+		
+		//Reserve all seats except 2 in Level 4
+		numSeatsNeeded = 1498; 
+		levelNeeded = 4;
+
+		seatHold1 = ticketService.findAndHoldSeats(numSeatsNeeded, Optional.of(levelNeeded), Optional.of(levelNeeded), customerEmail1);
+		assertEquals(2,ticketService.numSeatsAvailable(Optional.of(levelNeeded)));	
+		heldSeats = levelDao.getHeldSeats(seatHold1.getSeatHoldId());
+		assertEquals(numSeatsNeeded, heldSeats.size());
+		confirmationCode = ticketService.reserveSeats(seatHold1.getSeatHoldId(), customerEmail1);
+		reservedSeats = levelDao.getReservedSeats(confirmationCode);
+		assertEquals(numSeatsNeeded, reservedSeats.size());
+		for(IRowSeat reserved: reservedSeats) {
+			assertTrue(levelNeeded == reserved.getLevelId());
+		}
+		
+		//Only 9 seats available.. among those 3 seats are in Level 3. When 3 seats reservation requested level 3 seats should be reserved
+		
+		numSeatsNeeded = 3; 
+
+		seatHold1 = ticketService.findAndHoldSeats(numSeatsNeeded, Optional.empty(), Optional.empty(), customerEmail1);
+		assertEquals(6,ticketService.numSeatsAvailable(Optional.empty()));	
+		heldSeats = levelDao.getHeldSeats(seatHold1.getSeatHoldId());
+		assertEquals(numSeatsNeeded, heldSeats.size());
+		confirmationCode = ticketService.reserveSeats(seatHold1.getSeatHoldId(), customerEmail1);
+		reservedSeats = levelDao.getReservedSeats(confirmationCode);
+		assertEquals(numSeatsNeeded, reservedSeats.size());
+		for(IRowSeat reserved: reservedSeats) {
+			assertTrue(3 == reserved.getLevelId());
+		}
+		
+		//Only 6 seats available.. Each Level 1, Level 2 and Level 4 has 2 seats. When 2 seats reservation requested level 1 seats should be reserved
+		
+		numSeatsNeeded = 2; 
+
+		seatHold1 = ticketService.findAndHoldSeats(numSeatsNeeded, Optional.empty(), Optional.empty(), customerEmail1);
+		assertEquals(4,ticketService.numSeatsAvailable(Optional.empty()));	
+		heldSeats = levelDao.getHeldSeats(seatHold1.getSeatHoldId());
+		assertEquals(numSeatsNeeded, heldSeats.size());
+		confirmationCode = ticketService.reserveSeats(seatHold1.getSeatHoldId(), customerEmail1);
+		reservedSeats = levelDao.getReservedSeats(confirmationCode);
+		assertEquals(numSeatsNeeded, reservedSeats.size());
+		for(IRowSeat reserved: reservedSeats) {
+			assertTrue(1 == reserved.getLevelId());
+		}
+		
+		//Only 4 seats available.. Each Level 2 and Level 4 has 2 seats. When 2 seats reservation requested level 2 seats should be reserved
+		
+		numSeatsNeeded = 2; 
+
+		seatHold1 = ticketService.findAndHoldSeats(numSeatsNeeded, Optional.empty(), Optional.empty(), customerEmail1);
+		assertEquals(2,ticketService.numSeatsAvailable(Optional.empty()));	
+		heldSeats = levelDao.getHeldSeats(seatHold1.getSeatHoldId());
+		assertEquals(numSeatsNeeded, heldSeats.size());
+		confirmationCode = ticketService.reserveSeats(seatHold1.getSeatHoldId(), customerEmail1);
+		reservedSeats = levelDao.getReservedSeats(confirmationCode);
+		assertEquals(numSeatsNeeded, reservedSeats.size());
+		for(IRowSeat reserved: reservedSeats) {
+			assertTrue(2 == reserved.getLevelId());
+		}
+		
+		//Only 2 seats available.. Should not reserve any seats
+		
+		numSeatsNeeded = 3; 
+
+		seatHold1 = ticketService.findAndHoldSeats(numSeatsNeeded, Optional.empty(), Optional.empty(), customerEmail1);
+		assertNull(seatHold1);
+				
+		//Only 2 seats available.. Level 4 has 2 seats. When 2 seats reservation requested level 4 seats should be reserved
+		
+		numSeatsNeeded = 2; 
+
+		seatHold1 = ticketService.findAndHoldSeats(numSeatsNeeded, Optional.empty(), Optional.empty(), customerEmail1);
+		assertEquals(0,ticketService.numSeatsAvailable(Optional.empty()));	
+		heldSeats = levelDao.getHeldSeats(seatHold1.getSeatHoldId());
+		assertEquals(numSeatsNeeded, heldSeats.size());
+		confirmationCode = ticketService.reserveSeats(seatHold1.getSeatHoldId(), customerEmail1);
+		reservedSeats = levelDao.getReservedSeats(confirmationCode);
+		assertEquals(numSeatsNeeded, reservedSeats.size());
+		for(IRowSeat reserved: reservedSeats) {
+			assertTrue(4 == reserved.getLevelId());
+		}
+	}
+	
+	@Test
+	public void testThread0() throws InterruptedException, ExecutionException{
+		test(10,10,0,false);
 	}
 	
 	@Test
 	public void testThread1() throws InterruptedException, ExecutionException{
 		levelDao.resetMockTable();
-		test(6250,1,0,1);
+		test(6250,1,0,false);
 	}
 	
 	@Test
 	public void testThread2() throws InterruptedException, ExecutionException{
 		levelDao.resetMockTable();
-		test(3125,2,0,1);
+		test(3125,2,0,false);
 	}
 	
 	@Test
 	public void testThread3() throws InterruptedException, ExecutionException{
 		levelDao.resetMockTable();
-		test(2083,3,0,1);
+		test(2083,3,0,false);
 	}
 	
 	@Test
 	public void testThread_HoldAfterExpiraryTime() throws InterruptedException, ExecutionException{
-		test(1,30,35000,0);
+		test(1,30,35000, true);
 	}
 	
 	@Test
 	public void testThread_HoldBeforeExpiraryTime() throws InterruptedException, ExecutionException{
 		levelDao.resetMockTable();
-		test(1,30,25000,1);
+		test(1,30,25000,false);
 	}
 	
-    private void test(final int threadCount, final int numSeatsPerThread, final int sleepTime, final int threadFactor) throws InterruptedException, ExecutionException {
+    private void test(final int threadCount, final int numSeatsPerThread, final int sleepTime, boolean isTestingExpiryTime) throws InterruptedException, ExecutionException {
     	 final String customerEmail = "makeshkumar.r@gmail.com";
     	 Callable<Integer> task = new Callable<Integer>() {
             @Override
@@ -154,9 +322,7 @@ public class TicketServiceTest {
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
         List<Future<Integer>> futures = executorService.invokeAll(tasks);
         List<Integer> resultList = new ArrayList<Integer>(futures.size());
-        // Check for exceptions
         for (Future<Integer> future : futures) {
-            // Throws an exception if an exception was thrown by the task.
             resultList.add(future.get());
         }
         // Validate the IDs
@@ -166,14 +332,32 @@ public class TicketServiceTest {
             expectedList.add(i);
         }
         Collections.sort(resultList);
-//        assertEquals(expectedList, resultList);
+
         Thread.sleep(sleepTime);
+        
+        List<Callable<String>> reserveTasks = new ArrayList<Callable<String>>(resultList.size());
+        Callable<String> reserverTask = null; 
         for( Integer holdId:resultList) {
-            ticketService.reserveSeats(holdId, customerEmail);
+        	reserverTask = new Callable<String>() {
+                @Override
+                public String call() {
+                	
+                	 String confirmationCode = ticketService.reserveSeats(holdId, customerEmail);
+                	 return confirmationCode;
+                }
+            };
+            reserveTasks.add(reserverTask);
         }
-		List<IRowSeat> reservedSeats = levelDao.getReservedSeats(customerEmail);
-		assertEquals(threadCount * numSeatsPerThread * threadFactor, reservedSeats.size());
-		assertTrue(checkConfirmationKeyIsAvailable(reservedSeats));
+        ExecutorService executorServiceReserver = Executors.newFixedThreadPool(threadCount);
+        List<Future<String>> futuresReserver = executorServiceReserver.invokeAll(reserveTasks);
+        for (Future<String> future : futuresReserver) {
+        	List<IRowSeat> reservedSeats = levelDao.getReservedSeats(future.get());
+        	if(!isTestingExpiryTime) {
+        		assertEquals(numSeatsPerThread, reservedSeats.size());
+        	}else {
+        		assertEquals(0, reservedSeats.size());
+        	}
+        }
     }
     
     private boolean checkConfirmationKeyIsAvailable(List<IRowSeat> reservedSeats) {

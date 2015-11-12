@@ -31,8 +31,8 @@ public class LevelSeatsDaoImpl implements LevelSeatsDao{
 	}
 	
 	@Override
-	public void reserveLevelSeat(int levelId, int rowNumber, int seatNumber, String cutomerEmail, String confirmationCode) {
-		MockLevelRowsTable.INSTANCE.reserveSeat(levelId, rowNumber, seatNumber, cutomerEmail, confirmationCode);
+	public void reserveLevelSeat(int levelId, int rowNumber, int seatNumber, int holdId, String cutomerEmail, String confirmationCode) {
+		MockLevelRowsTable.INSTANCE.reserveSeat(levelId, rowNumber, seatNumber, holdId, cutomerEmail, confirmationCode);
 	}
 
 	@Override
@@ -66,8 +66,8 @@ public class LevelSeatsDaoImpl implements LevelSeatsDao{
 	}
 	
 	@Override
-	public List<IRowSeat> getReservedSeats(String customerEmail) {
-		return MockLevelRowsTable.INSTANCE.getReservedSeats(customerEmail);
+	public List<IRowSeat> getReservedSeats(String confirmationCode) {
+		return MockLevelRowsTable.INSTANCE.getReservedSeats(confirmationCode);
 	}
 
 	@Override

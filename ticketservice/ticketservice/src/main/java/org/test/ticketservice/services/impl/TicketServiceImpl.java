@@ -88,10 +88,10 @@ public class TicketServiceImpl implements TicketService {
 			availableSeatsCount = levelDao.countLevelAvailableSeats(levelCount);
 
 			if(availableSeatsCount>=numSeats && !isSeatAssigned) {
-
-				levelAvailableSeats = levelDao.getLevelAvailableSeats(levelCount);
+				
 				ReentrantLock lock = new ReentrantLock();
 				lock.lock();
+				levelAvailableSeats = levelDao.getLevelAvailableSeats(levelCount);
 				try{
 				for(IRowSeat availableSeat:levelAvailableSeats) {
 					if(levelDao.holdLevelSeat(availableSeat.getLevelId(), availableSeat.getRowNumber(), availableSeat.getSeatNumber(),holdId)) {
@@ -117,9 +117,9 @@ public class TicketServiceImpl implements TicketService {
 
 			if(availableSeatsCount>=(numSeats-holdCountMap.getOrDefault(holdId, 0))) {
 
-				levelAvailableSeats = levelDao.getAllLevelAvailableSeats();
 				ReentrantLock lock = new ReentrantLock();
 				lock.lock();
+				levelAvailableSeats = levelDao.getAllLevelAvailableSeats();
 				try{
 				for(IRowSeat availableSeat:levelAvailableSeats) {
 					if(availableSeat.getLevelId()>= minimumLevel && availableSeat.getLevelId() <= maximumLevel &&
@@ -142,8 +142,8 @@ public class TicketServiceImpl implements TicketService {
 	public String reserveSeats(int seatHoldId, String customerEmail) {
 		List<IRowSeat> heldSeats = levelDao.getHeldSeats(seatHoldId);
 		String confirmationCode = UUID.randomUUID().toString();
-		heldSeats.forEach(e -> {levelDao.reserveLevelSeat(e.getLevelId(), e.getRowNumber(), e.getSeatNumber(), customerEmail, confirmationCode);});
-		List<IRowSeat> reservedSeats = levelDao.getReservedSeats(customerEmail);
+		heldSeats.forEach(e -> {levelDao.reserveLevelSeat(e.getLevelId(), e.getRowNumber(), e.getSeatNumber(), seatHoldId, customerEmail, confirmationCode);});
+		List<IRowSeat> reservedSeats = levelDao.getReservedSeats(confirmationCode);
 		
 		if(reservedSeats.size() == heldSeats.size()) {
 			return confirmationCode;

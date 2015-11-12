@@ -139,13 +139,13 @@ public enum MockLevelRowsTable {
 		return allHeldSeats;
 	}
 	
-	public List<IRowSeat> getReservedSeats(String customerEmail) {
+	public List<IRowSeat> getReservedSeats(String confirmationCode) {
 		List<IRowSeat> allReservedSeats= new ArrayList<IRowSeat>();
 		if(venueLevelSeats!=null && !venueLevelSeats.isEmpty()) {
 			Collection<Map<Integer, Map<Integer, IRowSeat>>> venueLevelSeatsEntries = venueLevelSeats.values();
 			venueLevelSeatsEntries.forEach(e -> {Collection<Map<Integer, IRowSeat>> rowSeatsMap = e.values();
 						rowSeatsMap.forEach(a -> {Collection<IRowSeat> rowSeats = a.values();
-						rowSeats.forEach(b -> {if(b.isReserved() && b.getCustomerEmail().get().equals(customerEmail)){allReservedSeats.add(b);}});
+						rowSeats.forEach(b -> {if(b.isReserved() && b.getConfirmationCode().get().equals(confirmationCode)){allReservedSeats.add(b);}});
 						});
 				});
 		}
@@ -177,13 +177,13 @@ public enum MockLevelRowsTable {
 		return allAvailableSeats;
 	}	
 	
-	public synchronized void reserveSeat(int levelId, int rowNumber, int seatNumber, String customerEmail, String confirmationCode) {
+	public synchronized void reserveSeat(int levelId, int rowNumber, int seatNumber, int holdId, String customerEmail, String confirmationCode) {
 		Map<Integer, Map<Integer, IRowSeat>> levelSeats = venueLevelSeats.get(levelId);
 		if(levelSeats!=null && !levelSeats.isEmpty()) {
 			Map<Integer, IRowSeat> rowSeats = levelSeats.get(rowNumber);
 			if(rowSeats!=null && !rowSeats.isEmpty()) {
 				IRowSeat seat = rowSeats.get(seatNumber);
-				if(seat.isHeld()) {
+				if(seat.isHeld() && holdId == seat.getSeatHoldId()) {
 					rowSeats.put(seatNumber, new ReservedSeat(levelId,rowNumber,seatNumber,customerEmail, confirmationCode));
 				}
 			}
@@ -209,7 +209,7 @@ public enum MockLevelRowsTable {
 		return false;
 	}
 	
-	public void unreserveSeat(int levelId, int rowNumber, int seatNumber) {
+	public synchronized void unreserveSeat(int levelId, int rowNumber, int seatNumber) {
 		Map<Integer, Map<Integer, IRowSeat>> levelSeats = venueLevelSeats.get(levelId);
 		if(levelSeats!=null && !levelSeats.isEmpty()) {
 			Map<Integer, IRowSeat> rowSeats = levelSeats.get(rowNumber);
